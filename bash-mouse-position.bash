@@ -16,25 +16,35 @@ if ! type -t _bmp_register >/dev/null; then
     _bmp_register || return 1
 fi
 
-_bmp_mouse_on=$'\\[\e[?1006h\e[?1000h\\]'
-_bmp_mouse_off=$'\e[?1000l\e[?1006l'
+case ${BASH_MOUSE_POSITION_MODE:-drag} in
+    click) _bmp_mouse_on=$'\\[\e[?1006h\e[?1000h\\]' ;;
+    *) _bmp_mouse_on=$'\\[\e[?1006h\e[?1002h\\]' ;;
+esac
+_bmp_mouse_off=$'\e[?1000l\e[?1002l\e[?1006l'
 
 bash_mouse_position_on() {
     local keymap
     for keymap in emacs-standard vi-insert vi-command; do
         bind -m "$keymap" '"\e[<": bash-mouse-position-click' || return 1
+        bind -m "$keymap" '"\C-x\C-d": kill-region'
+        bind -m "$keymap" '"\C-xw": copy-region-as-kill'
+        bind -m "$keymap" '"\C-x\C-l": bash-mouse-position-clear'
+        bind -m "$keymap" '"\C-x\C-a": set-mark'
+        bind -m "$keymap" '"\C-x\C-y": yank'
     done
     [[ $PS1 == "$_bmp_mouse_on"* ]] || PS1=$_bmp_mouse_on$PS1
     [[ ${PS0-} == "$_bmp_mouse_off"* ]] || PS0=$_bmp_mouse_off${PS0-}
 }
 
 bash_mouse_position_off() {
-    local keymap
+    local keymap sequence
     PS1=${PS1#"$_bmp_mouse_on"}
     PS0=${PS0#"$_bmp_mouse_off"}
     printf '%s' "$_bmp_mouse_off" >/dev/tty
     for keymap in emacs-standard vi-insert vi-command; do
-        bind -m "$keymap" -r '\e[<'
+        for sequence in '\e[<' '\C-x\C-d' '\C-xw' '\C-x\C-l' '\C-x\C-a' '\C-x\C-y'; do
+            bind -m "$keymap" -r "$sequence"
+        done
     done
 }
 

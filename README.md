@@ -25,7 +25,25 @@ sh build.sh &&
 source ./bash-mouse-position.bash
 ```
 
-Paste a long command at the prompt, or press Up to recall one. Left-click a character on either row to move the cursor, then type to edit. The cursor moves when you release the button. Run `bash_mouse_position_off` to disable it and `bash_mouse_position_on` to enable it again.
+Paste a long command at the prompt, or press Up to recall one. Left-click a character on either row to move the cursor, then type to edit. The cursor moves on a left-click. Drag across part of the command to select it when the terminal forwards drag events. Run `bash_mouse_position_off` to disable it and `bash_mouse_position_on` to enable it again.
+
+### Bash editing shortcuts
+
+Press each pair in sequence.
+
+| Keys | Action |
+| --- | --- |
+| Ctrl+X, Ctrl+A | Set the selection start. Move the cursor with the arrow keys to extend it. |
+| Ctrl+X, Ctrl+D | Delete text between the selection start and the cursor. |
+| Ctrl+X, W | Copy that text to Bash’s Readline kill ring. |
+| Ctrl+X, Ctrl+Y | Paste from the Readline kill ring. |
+| Ctrl+X, Ctrl+L | Clear the entire command. |
+
+The keyboard selection shortcuts also work when GNU Screen or the outer terminal does not forward drag events. Visual highlighting depends on the Readline version. The Readline kill ring stays in the current shell. For the Mac clipboard, use your terminal’s normal text selection and Copy.
+
+If drag tracking interferes with clicks, start a new Bash window with `BASH_MOUSE_POSITION_MODE=click` set before sourcing the add-on. This keeps keyboard editing available and requests click-only mouse tracking.
+
+After pulling an update on the HPC, run `sh build.sh` from the repo and open a new Bash window so it loads the rebuilt library.
 
 ## Use it on an HPC login node or inside Herdr
 
@@ -49,4 +67,4 @@ Once it works, add `source ~/bash-mouse-position/bash-mouse-position.bash` near 
 - A click briefly waits for the terminal's cursor-position reply. On a slow SSH connection, wait for the cursor to move before typing.
 - The add-on owns the Readline escape prefix for SGR mouse reports while enabled. If mouse reporting gets stuck, run `printf '\033[?1000l\033[?1006l'` in the affected terminal.
 
-The loadable builtin registers a Readline handler for SGR mouse reports. The handler measures the distance from the displayed cursor to the clicked cell and moves the Readline cursor by that amount.
+The Bash loadable builtin registers a Readline handler for SGR mouse reports. It uses cursor coordinates to place the cursor and set the selection mark.
