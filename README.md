@@ -10,7 +10,7 @@ cd bash-mouse-position &&
 source ./zsh-mouse-position.zsh
 ```
 
-If you cloned the repository already, run `git pull` in that directory and then source the file. Left-click a character to move the cursor, or drag across text to select it. Press **Ctrl+X, then Ctrl+D** to delete the selection or **Ctrl+X, then Ctrl+L** to clear the whole command. Use `zsh_mouse_position_off` to turn it off. To enable it in future panes, source the script by its absolute path near the end of your `~/.zshrc`.
+If you cloned the repository already, run `git pull` in that directory and then source the file. Left-click a character to move the cursor, or drag across text to select it. Press **Ctrl+X, then Ctrl+D** to delete the selection or **Ctrl+X, then Ctrl+L** to clear the whole command. Press **Ctrl+X, then w** to copy the selection, then paste with your Mac’s **⌘V**. Use `zsh_mouse_position_off` to turn it off. To enable it in future panes, source the script by its absolute path near the end of your `~/.zshrc`.
 
 The zsh version uses ZLE and requires no compiler. In macOS Terminal, enable **View → Allow Mouse Reporting**. Use a plain single click in the focused Herdr pane. If drag tracking interferes with clicks in your terminal, run `zsh_mouse_position_on click` to use click-only tracking. Run `zsh_mouse_position_on drag` to enable drag selection again.
 
@@ -35,13 +35,13 @@ Press each pair in sequence.
 | --- | --- |
 | Ctrl+X, m | Set the selection start. Move the cursor with the arrow keys to extend it. |
 | Ctrl+X, Ctrl+D | Delete text between the selection start and the cursor. |
-| Ctrl+X, W | Copy that text to Bash’s Readline kill ring. |
+| Ctrl+X, w | Copy the selection to Bash’s paste buffer and request a write to the host clipboard. |
 | Ctrl+X, Ctrl+Y | Paste from the Readline kill ring. |
 | Ctrl+X, Ctrl+L | Clear the entire command. |
 
-Bash defaults to keyboard editing inside GNU Screen. Some Screen versions pass through mouse reports incorrectly, which can insert fragments into the command. For mouse selection, use a Bash prompt outside GNU Screen through your terminal or Herdr. The keyboard shortcuts work inside Screen. Visual highlighting depends on the Readline version. The Readline kill ring stays in the current shell. For the Mac clipboard, use your terminal’s normal text selection and Copy.
+Bash enables mouse editing in GNU Screen 4.08 and defaults to keyboard editing for other Screen versions. The keyboard shortcuts work in either mode. Visual highlighting depends on the Readline version. When Herdr runs on your Mac, it can forward the copy to the Mac clipboard for **⌘V**. Screen limits clipboard forwarding to 560 bytes per selection. Longer selections can still be pasted within the same Bash session.
 
-If drag tracking interferes with clicks, start a new Bash window with `BASH_MOUSE_POSITION_MODE=click` set before sourcing the add-on. This keeps keyboard editing available and requests click-only mouse tracking.
+Set `BASH_MOUSE_POSITION_MODE=click` or `BASH_MOUSE_POSITION_MODE=keyboard` before sourcing the Bash add-on to request click-only or keyboard-only editing.
 
 After pulling an update on the HPC, run `sh build.sh` from the repo and open a new Bash window so it loads the rebuilt library.
 

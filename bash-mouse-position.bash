@@ -21,7 +21,11 @@ PS1=${PS1#"${_bmp_mouse_on-}"}
 PS0=${PS0#"${_bmp_mouse_off-}"}
 _bmp_mode=${BASH_MOUSE_POSITION_MODE:-drag}
 if [[ -n ${STY:-} && -z ${BASH_MOUSE_POSITION_MODE:-} ]]; then
-    _bmp_mode=keyboard
+    # Enable mouse drag on the Screen release tested end to end.
+    case $(screen --version 2>/dev/null) in
+        'Screen version 4.08.00 '*) _bmp_mode=drag ;;
+        *) _bmp_mode=keyboard ;;
+    esac
 fi
 case $_bmp_mode in
     click) _bmp_mouse_on=$'\\[\e[?1006h\e[?1000h\\]' ;;
@@ -35,11 +39,13 @@ bash_mouse_position_on() {
     for keymap in emacs-standard vi-insert vi-command; do
         if [[ -n $_bmp_mouse_on ]]; then
             bind -m "$keymap" '"\e[<": bash-mouse-position-click' || return 1
+            bind -m "$keymap" '"\e[M": bash-mouse-position-click' || return 1
         elif [[ $(bind -m "$keymap" -q bash-mouse-position-click) == *'\e[<'* ]]; then
             bind -m "$keymap" -r '\e[<'
+            bind -m "$keymap" -r '\e[M'
         fi
         bind -m "$keymap" '"\C-x\C-d": kill-region'
-        bind -m "$keymap" '"\C-xw": copy-region-as-kill'
+        bind -m "$keymap" '"\C-xw": bash-mouse-position-copy'
         bind -m "$keymap" '"\C-x\C-l": bash-mouse-position-clear'
         bind -m "$keymap" '"\C-xm": set-mark'
         bind -m "$keymap" '"\C-x\C-y": yank'
@@ -58,7 +64,7 @@ bash_mouse_position_off() {
     PS0=${PS0#"$_bmp_mouse_off"}
     printf '%s' "$_bmp_mouse_off" >/dev/tty
     for keymap in emacs-standard vi-insert vi-command; do
-        for sequence in '\e[<' '\C-x\C-d' '\C-xw' '\C-x\C-l' '\C-xm' '\C-x\C-y'; do
+        for sequence in '\e[<' '\e[M' '\C-x\C-d' '\C-xw' '\C-x\C-l' '\C-xm' '\C-x\C-y'; do
             bind -m "$keymap" -r "$sequence"
         done
     done

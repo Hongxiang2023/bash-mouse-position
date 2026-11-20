@@ -94,6 +94,23 @@ _zmp_clear_command() {
     _zmp_drag_width=0
 }
 
+_zmp_copy_selection() {
+    (( REGION_ACTIVE && MARK != CURSOR )) || return 0
+    zle .copy-region-as-kill
+    local encoded
+    if [[ -z ${STY:-} && -z ${SSH_CONNECTION:-} && -n ${commands[pbcopy]:-} ]]; then
+        printf '%s' "$CUTBUFFER" | pbcopy
+        return
+    fi
+    encoded=$(printf '%s' "$CUTBUFFER" | base64 | tr -d '\n') || return 1
+    if [[ -n ${STY:-} ]]; then
+        (( ${#encoded} <= 748 )) || { zle beep; return 0; }
+        printf '\eP\e]52;c;%s\a\e\\' "$encoded" >/dev/tty
+    else
+        printf '\e]52;c;%s\a' "$encoded" >/dev/tty
+    fi
+}
+
 zsh_mouse_position_on() {
     local keymap
     case ${1:-drag} in
@@ -104,10 +121,12 @@ zsh_mouse_position_on() {
     zle -N _zmp_click
     zle -N _zmp_delete_selection
     zle -N _zmp_clear_command
+    zle -N _zmp_copy_selection
     for keymap in emacs viins vicmd; do
         bindkey -M "$keymap" $'\e[<' _zmp_click || return 1
         bindkey -M "$keymap" '^X^D' _zmp_delete_selection
         bindkey -M "$keymap" '^X^L' _zmp_clear_command
+        bindkey -M "$keymap" '^Xw' _zmp_copy_selection
     done
     add-zle-hook-widget line-init _zmp_start
     add-zle-hook-widget line-finish _zmp_finish
@@ -122,6 +141,7 @@ zsh_mouse_position_off() {
         bindkey -M "$keymap" -r $'\e[<'
         bindkey -M "$keymap" -r '^X^D'
         bindkey -M "$keymap" -r '^X^L'
+        bindkey -M "$keymap" -r '^Xw'
     done
 }
 
