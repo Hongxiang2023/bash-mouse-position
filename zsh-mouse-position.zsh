@@ -4,14 +4,17 @@ autoload -Uz add-zle-hook-widget
 typeset -gi _zmp_drag_width=0 _zmp_anchor=0 _zmp_anchor_row=0 _zmp_anchor_col=0
 typeset -g _zmp_drag_buffer=''
 
+# Clear both modes so re-sourcing over an older version leaves one active mode.
+_zmp_reset_mouse=$'\e[?1000l\e[?1002l\e[?1006l'
+
 _zmp_start() {
     _zmp_drag_width=0
-    printf '\e[?1006h\e[?1002h' >/dev/tty
+    printf '%s\e[?1006h\e[?%sh' "$_zmp_reset_mouse" "$_zmp_tracking_mode" >/dev/tty
 }
 
 _zmp_finish() {
     _zmp_drag_width=0
-    printf '\e[?1002l\e[?1006l' >/dev/tty
+    printf '%s' "$_zmp_reset_mouse" >/dev/tty
 }
 
 _zmp_click() {
@@ -93,6 +96,11 @@ _zmp_clear_command() {
 
 zsh_mouse_position_on() {
     local keymap
+    case ${1:-drag} in
+        drag) typeset -g _zmp_tracking_mode=1002 ;;
+        click) typeset -g _zmp_tracking_mode=1000 ;;
+        *) print -u2 'Usage: zsh_mouse_position_on [drag|click]'; return 1 ;;
+    esac
     zle -N _zmp_click
     zle -N _zmp_delete_selection
     zle -N _zmp_clear_command

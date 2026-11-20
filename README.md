@@ -12,7 +12,7 @@ source ./zsh-mouse-position.zsh
 
 If you cloned the repository already, run `git pull` in that directory and then source the file. Left-click a character to move the cursor, or drag across text to select it. Press **Ctrl+X, then Ctrl+D** to delete the selection or **Ctrl+X, then Ctrl+L** to clear the whole command. Use `zsh_mouse_position_off` to turn it off. To enable it in future panes, source the script by its absolute path near the end of your `~/.zshrc`.
 
-The zsh version uses ZLE and requires no compiler. In macOS Terminal, enable **View → Allow Mouse Reporting**. Use a plain single click in the focused Herdr pane.
+The zsh version uses ZLE and requires no compiler. In macOS Terminal, enable **View → Allow Mouse Reporting**. Use a plain single click in the focused Herdr pane. If drag tracking interferes with clicks in your terminal, run `zsh_mouse_position_on click` to use click-only tracking. Run `zsh_mouse_position_on drag` to enable drag selection again.
 
 ## Try it in Bash
 
