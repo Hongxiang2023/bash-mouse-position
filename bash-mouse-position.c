@@ -92,23 +92,26 @@ static void drag_event(int button, char event, int row, int column)
     rl_get_screen_size(&rows, &columns);
     if ((button != 0 && button != 32) || !drag_width)
         return;
-    if (event == 'm') {
-        if (rl_mark != rl_point && activate_mark)
-            activate_mark();
+    int width = drag_width;
+    if (event == 'm')
         drag_width = 0;
+    else if (button != 32)
         return;
-    }
-    if (button != 32 || drag_width != columns || anchor > rl_end ||
+
+    if (width != columns || anchor > rl_end ||
         row < 1 || row > rows || column < 1 || column > columns)
         return;
 
+    /* A drag that starts in the command can finish on the surrounding blank cells. */
     long target = anchor + (row - anchor_row) * (long)columns + column - anchor_column;
-    if (target >= 0 && target <= rl_end) {
-        rl_mark = anchor;
-        rl_point = (int)target;
-        if (activate_mark && rl_mark != rl_point)
-            activate_mark();
-    }
+    if (target < 0)
+        target = 0;
+    if (target > rl_end)
+        target = rl_end;
+    rl_mark = anchor;
+    rl_point = (int)target;
+    if (activate_mark && rl_mark != rl_point)
+        activate_mark();
 }
 
 static int decode_legacy(const unsigned char data[3], int *button, int *row,
