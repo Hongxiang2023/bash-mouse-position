@@ -16,24 +16,40 @@ if ! type -t _bmp_register >/dev/null; then
     _bmp_register || return 1
 fi
 
-case ${BASH_MOUSE_POSITION_MODE:-drag} in
+# Retire an earlier prompt prefix when this file is sourced again.
+PS1=${PS1#"${_bmp_mouse_on-}"}
+PS0=${PS0#"${_bmp_mouse_off-}"}
+_bmp_mode=${BASH_MOUSE_POSITION_MODE:-drag}
+if [[ -n ${STY:-} && -z ${BASH_MOUSE_POSITION_MODE:-} ]]; then
+    _bmp_mode=keyboard
+fi
+case $_bmp_mode in
     click) _bmp_mouse_on=$'\\[\e[?1006h\e[?1000h\\]' ;;
-    *) _bmp_mouse_on=$'\\[\e[?1006h\e[?1002h\\]' ;;
+    drag) _bmp_mouse_on=$'\\[\e[?1006h\e[?1002h\\]' ;;
+    *) _bmp_mouse_on='' ;;
 esac
 _bmp_mouse_off=$'\e[?1000l\e[?1002l\e[?1006l'
 
 bash_mouse_position_on() {
     local keymap
     for keymap in emacs-standard vi-insert vi-command; do
-        bind -m "$keymap" '"\e[<": bash-mouse-position-click' || return 1
+        if [[ -n $_bmp_mouse_on ]]; then
+            bind -m "$keymap" '"\e[<": bash-mouse-position-click' || return 1
+        elif [[ $(bind -m "$keymap" -q bash-mouse-position-click) == *'\e[<'* ]]; then
+            bind -m "$keymap" -r '\e[<'
+        fi
         bind -m "$keymap" '"\C-x\C-d": kill-region'
         bind -m "$keymap" '"\C-xw": copy-region-as-kill'
         bind -m "$keymap" '"\C-x\C-l": bash-mouse-position-clear'
-        bind -m "$keymap" '"\C-x\C-a": set-mark'
+        bind -m "$keymap" '"\C-xm": set-mark'
         bind -m "$keymap" '"\C-x\C-y": yank'
     done
-    [[ $PS1 == "$_bmp_mouse_on"* ]] || PS1=$_bmp_mouse_on$PS1
-    [[ ${PS0-} == "$_bmp_mouse_off"* ]] || PS0=$_bmp_mouse_off${PS0-}
+    if [[ -n $_bmp_mouse_on ]]; then
+        [[ $PS1 == "$_bmp_mouse_on"* ]] || PS1=$_bmp_mouse_on$PS1
+        [[ ${PS0-} == "$_bmp_mouse_off"* ]] || PS0=$_bmp_mouse_off${PS0-}
+    else
+        printf '%s' "$_bmp_mouse_off" >/dev/tty
+    fi
 }
 
 bash_mouse_position_off() {
@@ -42,7 +58,7 @@ bash_mouse_position_off() {
     PS0=${PS0#"$_bmp_mouse_off"}
     printf '%s' "$_bmp_mouse_off" >/dev/tty
     for keymap in emacs-standard vi-insert vi-command; do
-        for sequence in '\e[<' '\C-x\C-d' '\C-xw' '\C-x\C-l' '\C-x\C-a' '\C-x\C-y'; do
+        for sequence in '\e[<' '\C-x\C-d' '\C-xw' '\C-x\C-l' '\C-xm' '\C-x\C-y'; do
             bind -m "$keymap" -r "$sequence"
         done
     done

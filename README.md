@@ -33,13 +33,13 @@ Press each pair in sequence.
 
 | Keys | Action |
 | --- | --- |
-| Ctrl+X, Ctrl+A | Set the selection start. Move the cursor with the arrow keys to extend it. |
+| Ctrl+X, m | Set the selection start. Move the cursor with the arrow keys to extend it. |
 | Ctrl+X, Ctrl+D | Delete text between the selection start and the cursor. |
 | Ctrl+X, W | Copy that text to Bash’s Readline kill ring. |
 | Ctrl+X, Ctrl+Y | Paste from the Readline kill ring. |
 | Ctrl+X, Ctrl+L | Clear the entire command. |
 
-The keyboard selection shortcuts also work when GNU Screen or the outer terminal does not forward drag events. Visual highlighting depends on the Readline version. The Readline kill ring stays in the current shell. For the Mac clipboard, use your terminal’s normal text selection and Copy.
+Bash defaults to keyboard editing inside GNU Screen. Some Screen versions pass through mouse reports incorrectly, which can insert fragments into the command. For mouse selection, use a Bash prompt outside GNU Screen through your terminal or Herdr. The keyboard shortcuts work inside Screen. Visual highlighting depends on the Readline version. The Readline kill ring stays in the current shell. For the Mac clipboard, use your terminal’s normal text selection and Copy.
 
 If drag tracking interferes with clicks, start a new Bash window with `BASH_MOUSE_POSITION_MODE=click` set before sourcing the add-on. This keeps keyboard editing available and requests click-only mouse tracking.
 
