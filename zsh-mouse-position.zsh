@@ -15,7 +15,8 @@ _zmp_click() {
     local LC_ALL=C byte report='' reply='' queued='' MATCH
     local -a match
     local -i row col target
-    local mouse_pattern='^0;([1-9][0-9]{0,4});([1-9][0-9]{0,4})m$'
+    # Move on button-down. A missing or intercepted release can still leave a valid click.
+    local mouse_pattern='^0;([1-9][0-9]{0,4});([1-9][0-9]{0,4})M$'
     local cursor_pattern=$'^\e\\[([1-9][0-9]{0,4});([1-9][0-9]{0,4})R$'
 
     while (( ${#report} < 17 )); do
