@@ -4,10 +4,12 @@ Click a character in the command you are editing to move Bash's cursor there. Th
 
 ## Try it
 
-Build it on the machine that runs Bash. From the repository directory, run:
+Paste this into the Bash prompt where you want mouse editing, including a Bash pane in Herdr or a Bash session on your HPC:
 
 ```bash
-sh build.sh
+git clone https://github.com/Hongxiang2023/bash-mouse-position.git &&
+cd bash-mouse-position &&
+sh build.sh &&
 source ./bash-mouse-position.bash
 ```
 
@@ -15,7 +17,7 @@ Paste a long command at the prompt, or press Up to recall one. Left-click a char
 
 ## Use it on an HPC login node or inside Herdr
 
-The script needs to live on the machine running the Bash prompt. For a remote prompt, copy the source directory over SSH, then build and source it on the remote machine:
+Run the steps above on the machine running Bash. If the HPC cannot reach GitHub, clone on your local machine first, then copy the source directory over SSH and build it on the HPC:
 
 ```bash
 scp -r bash-mouse-position your-user@your-hpc:~/
